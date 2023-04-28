@@ -22,6 +22,10 @@ Please run
 
 to reproduce the results.
 
+## Timeline
+
+[04.28] Mistakes made during code cleanup have been fixed.
+
 ## Acknowledgements
 
 This repository contains code snippets and some model weights from repositories mentioned below.
