@@ -1,4 +1,4 @@
-﻿import os
+import os
 import numpy as np
 import random
 import torch
@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(description="RLB-MI")
 parser.add_argument('-model_name', default='VGG16')
 parser.add_argument("-max_episodes", type=int, default=40000)
 parser.add_argument("-max_step", type=int, default=1)
-parser.add_argument("-seed", type=int, default=0)
+parser.add_argument("-seed", type=int, default=42)
 parser.add_argument("-alpha", type=float, default=0)
 parser.add_argument("-n_classes", type=int, default=1000)
 parser.add_argument("-z_dim", type=int, default=100)
@@ -73,10 +73,14 @@ if __name__ == "__main__":
 
     seed_everything(seed)
 
+    total = 0
     cnt = 0
     cnt5 = 0
 
-    for i in range(n_target):
+    identities = range(n_classes)
+    targets = random.sample(identities, n_target)
+
+    for i in targets:
         agent = Agent(state_size=z_dim, action_size=z_dim, random_seed=seed, hidden_size=256, action_prior="uniform")
         recon_image = inversion(agent, G, T, alpha, z_dim=z_dim, max_episodes=max_episodes, max_step=max_step, label=i, model_name=model_name)
         _, output= E(low2high(recon_image))
@@ -84,13 +88,13 @@ if __name__ == "__main__":
         top_idx = torch.argmax(eval_prob)
         _, top5_idx = torch.topk(eval_prob, 5)
 
+        total += 1
         if top_idx == i:
             cnt += 1
         if i in top5_idx:
             cnt5 += 1
-        acc = cnt / (i+1)
-        acc5 = cnt5 / (i+1)
-        print("Classes {}/{}, Accuracy : {:.3f}, Top-5 Accuracy : {:.3f}".format(i+1, n_target, acc, acc5))
-        
 
+        acc = cnt / total
+        acc5 = cnt5 / total
+        print("Classes {}/{}, Accuracy : {:.3f}, Top-5 Accuracy : {:.3f}".format(total, n_target, acc, acc5))
     
